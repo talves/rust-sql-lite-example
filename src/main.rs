@@ -31,6 +31,8 @@ fn main() -> Result<()> {
     dog_colors.insert(String::from("Grey"), vec!["Ruger", "Rocko"]);
     dog_colors.insert(String::from("Black"), vec!["Nexus", "Freezo"]);
 
+    conn.execute("delete from dogs", [])?;
+    conn.execute("delete from dog_colors", [])?;
     for (color, dognames) in &dog_colors {
         conn.execute(
             "INSERT INTO dog_colors (name) values (?1)",
@@ -67,6 +69,7 @@ fn main() -> Result<()> {
     successful_tx(&mut conn)?;
 
     let res = rolled_back_tx(&mut conn);
+    println!("Error[{}]: {:?}", res.is_err(), res);
     assert!(res.is_err());
 
     Ok(())
@@ -75,9 +78,10 @@ fn main() -> Result<()> {
 fn successful_tx(conn: &mut Connection) -> Result<()> {
     let tx = conn.transaction()?;
 
+    tx.execute("delete from dogs", [])?;
     tx.execute("delete from dog_colors", [])?;
-    tx.execute("insert into dog_colors (name) values (?1)", &[&"lavender"])?;
-    tx.execute("insert into dog_colors (name) values (?1)", &[&"blue"])?;
+    tx.execute("insert into dog_colors (name) values (?1)", &[&"purple"])?;
+    tx.execute("insert into dog_colors (name) values (?1)", &[&"green"])?;
 
     tx.commit()
 }
@@ -86,9 +90,9 @@ fn rolled_back_tx(conn: &mut Connection) -> Result<()> {
     let tx = conn.transaction()?;
 
     tx.execute("delete from dog_colors", [])?;
-    tx.execute("insert into dog_colors (name) values (?1)", &[&"lavender"])?;
-    tx.execute("insert into dog_colors (name) values (?1)", &[&"blue"])?;
-    tx.execute("insert into dog_colors (name) values (?1)", &[&"lavender"])?;
+    tx.execute("insert into dog_colors (name) values (?1)", &[&"purple"])?;
+    tx.execute("insert into dog_colors (name) values (?1)", &[&"green"])?;
+    tx.execute("insert into dog_colors (name) values (?1)", &[&"purple"])?;
 
     tx.commit()
 }
