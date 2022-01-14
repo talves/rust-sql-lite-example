@@ -62,6 +62,13 @@ fn main() -> Result<()> {
         println!("Found dog {:?}", dog);
     }
 
+    let mut conn = Connection::open("dogs.db")?;
+
+    successful_tx(&mut conn)?;
+
+    let res = rolled_back_tx(&mut conn);
+    assert!(res.is_err());
+
     Ok(())
 }
 
